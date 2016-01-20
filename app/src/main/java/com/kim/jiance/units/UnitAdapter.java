@@ -47,22 +47,22 @@ public class UnitAdapter extends ArrayAdapter<SimpleFireControlMess> {
 
         item1.setText(mess.getUnitcode());
         item2.setText(mess.getUnitname());
-        item3.setText(mess.getEvetcount());
-        item4.setText(mess.getTotlafailure());
+        item3.setText(String.valueOf(mess.getEvetcount()));
+        item4.setText(String.valueOf(mess.getTotlafailure()));
         double integrityrate = mess.getEquipmentintegrityrate();
         String str = "";
         CharSequence charSequence = "";
         if (integrityrate >= 0 && integrityrate < 0.3) {
-            str = "<font color='#FF0000'>" + String.format("%3.2lf", integrityrate) + "%</font>";
+            str = "<font color='#FF0000'>" + String.format("%3.2f", integrityrate) + "%</font>";
             charSequence = Html.fromHtml(str);
         } else if (integrityrate >= 0.3 && integrityrate < 0.6) {
-            str = "<font color='EEEE00'>" + String.format("%3.2lf", integrityrate) + "%</font>";
+            str = "<font color='EEEE00'>" + String.format("%3.2f", integrityrate) + "%</font>";
             charSequence = Html.fromHtml(str);
         } else if (integrityrate >= 0.6 && integrityrate < 0.9) {
-            str = "<font color='EE4000'>" + String.format("%3.2lf", integrityrate) + "%</font>";
+            str = "<font color='EE4000'>" + String.format("%3.2f", integrityrate) + "%</font>";
             charSequence = Html.fromHtml(str);
         } else if (integrityrate >= 0.9 && integrityrate <= 1) {
-            str = "<font color='#00EE00'>" + String.format("%3.2lf", integrityrate) + "%</font>";
+            str = "<font color='#00EE00'>" + String.format("%3.2f", integrityrate) + "%</font>";
             charSequence = Html.fromHtml(str);
         }
         item5.setText(charSequence);

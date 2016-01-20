@@ -11,13 +11,16 @@
         android:background="@color/white"
         android:orientation="horizontal">
 
-        <TextView
+        <com.kim.jiance.utils.MarqueeText
             android:id="@+id/item1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:ellipsize="marquee"
+            android:gravity="center"
+            android:marqueeRepeatLimit="marquee_forever"
             android:padding="6dp"
+            android:scrollHorizontally="true"
             android:singleLine="true"
             android:textSize="18sp" />
 
@@ -26,13 +29,16 @@
             android:layout_height="match_parent"
             android:background="@color/grey" />
 
-        <TextView
+        <com.kim.jiance.utils.MarqueeText
             android:id="@+id/item2"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:ellipsize="marquee"
+            android:gravity="center"
+            android:marqueeRepeatLimit="marquee_forever"
             android:padding="6dp"
+            android:scrollHorizontally="true"
             android:singleLine="true"
             android:textSize="18sp" />
 
@@ -41,13 +47,16 @@
             android:layout_height="match_parent"
             android:background="@color/grey" />
 
-        <TextView
+        <com.kim.jiance.utils.MarqueeText
             android:id="@+id/item3"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:ellipsize="marquee"
+            android:gravity="center"
+            android:marqueeRepeatLimit="marquee_forever"
             android:padding="6dp"
+            android:scrollHorizontally="true"
             android:singleLine="true"
             android:textSize="18sp" />
 
@@ -56,13 +65,16 @@
             android:layout_height="match_parent"
             android:background="@color/grey" />
 
-        <TextView
+        <com.kim.jiance.utils.MarqueeText
             android:id="@+id/item4"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:ellipsize="marquee"
+            android:gravity="center"
+            android:marqueeRepeatLimit="marquee_forever"
             android:padding="6dp"
+            android:scrollHorizontally="true"
             android:singleLine="true"
             android:textSize="18sp" />
 
@@ -71,20 +83,17 @@
             android:layout_height="match_parent"
             android:background="@color/grey" />
 
-        <TextView
+        <com.kim.jiance.utils.MarqueeText
             android:id="@+id/item5"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:ellipsize="marquee"
             android:gravity="center"
+            android:marqueeRepeatLimit="marquee_forever"
             android:padding="6dp"
+            android:scrollHorizontally="true"
             android:singleLine="true"
             android:textSize="18sp" />
     </LinearLayout>
-
-    <!--<View-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="1dp"-->
-        <!--android:background="@color/grey" />-->
 </LinearLayout>

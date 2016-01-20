@@ -1,5 +1,6 @@
 package com.kim.jiance.units;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -8,29 +9,35 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
 import android.text.Html;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 
 import com.alibaba.fastjson.JSON;
 import com.kim.jiance.R;
 import com.kim.jiance.content.App;
 import com.kim.jiance.content.MyURL;
 import com.kim.jiance.login.LoginActivity;
-import com.kim.jiance.unit.UnitActivity;
-import com.kim.jiance.unit.machine.MachineListFragment;
 import com.kim.jiance.model.more.SimpleFireControlMess;
+import com.kim.jiance.unit.UnitActivity;
 import com.kim.jiance.utils.HttpUtil;
 
 import org.restlet.resource.ResourceException;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,16 +55,26 @@ public class UnitListActivity extends AppCompatActivity implements SwipeRefreshL
     ListView list;
     @Bind(R.id.swiperefreshlayout)
     SwipeRefreshLayout swiperefreshlayout;
+    @Bind(R.id.image_search_back)
+    ImageView imageSearchBack;
+    @Bind(R.id.edit_text_search)
+    EditText editTextSearch;
+    @Bind(R.id.image_clear_search)
+    ImageView imageClearSearch;
+    @Bind(R.id.card_search)
+    RelativeLayout cardSearch;
 
     private int backKeyPressedTime = 0;
     private UnitAdapter adapter;
+    private List<SimpleFireControlMess> messList = null;
+    private List<SimpleFireControlMess> searchList = null;
 
     Handler getUnitListHandler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(Message msg) {
             String unitListStr = (String) msg.obj;
             if (!unitListStr.equals("null") && unitListStr != null) {
-                List<SimpleFireControlMess> messList = JSON.parseArray(unitListStr, SimpleFireControlMess.class);
+                messList = JSON.parseArray(unitListStr, SimpleFireControlMess.class);
                 adapter = new UnitAdapter(UnitListActivity.this, R.layout.item_common, messList);
                 list.setAdapter(adapter);
                 swiperefreshlayout.setRefreshing(false);
@@ -83,6 +100,48 @@ public class UnitListActivity extends AppCompatActivity implements SwipeRefreshL
         swiperefreshlayout.setOnRefreshListener(this);
         list.setOnItemClickListener(this);
 
+        imageSearchBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                hintSearch();
+                editTextSearch.setText("");
+                InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                inputMethodManager.toggleSoftInput(0, InputMethodManager.HIDE_NOT_ALWAYS);
+            }
+        });
+
+        imageClearSearch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                editTextSearch.setText("");
+            }
+        });
+
+        editTextSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (messList != null) {
+                    searchList = new ArrayList<SimpleFireControlMess>();
+                    for (SimpleFireControlMess simpleFireControlMess : messList) {
+                        if (simpleFireControlMess.getUnitname().contains(s)) {
+                            searchList.add(simpleFireControlMess);
+                        }
+                    }
+                    adapter = new UnitAdapter(UnitListActivity.this, R.layout.item_common, searchList);
+                    list.setAdapter(adapter);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
         refresh();
     }
 
@@ -97,6 +156,7 @@ public class UnitListActivity extends AppCompatActivity implements SwipeRefreshL
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_search:
+                showSearch();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -147,7 +207,9 @@ public class UnitListActivity extends AppCompatActivity implements SwipeRefreshL
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK && backKeyPressedTime == 0) {
+        if (keyCode == KeyEvent.KEYCODE_BACK && !toolbar.isShown() && cardSearch.isShown()) {
+            hintSearch();
+        } else if (keyCode == KeyEvent.KEYCODE_BACK && backKeyPressedTime == 0) {
             Snackbar snackbar = Snackbar.make(toolbar, "再按一次返回键退出程序,或注销", Snackbar.LENGTH_SHORT);
             String str = "<font color='#FFF'>注销</font>";
             CharSequence charSequence = Html.fromHtml(str);
@@ -182,5 +244,26 @@ public class UnitListActivity extends AppCompatActivity implements SwipeRefreshL
             System.exit(0);
         }
         return true;
+    }
+
+    public void showSearch() {
+        if (toolbar.isShown() && !cardSearch.isShown()) {
+            toolbar.setVisibility(View.INVISIBLE);
+            cardSearch.setVisibility(View.VISIBLE);
+            editTextSearch.requestFocus();
+            InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            inputMethodManager.toggleSoftInput(0, InputMethodManager.HIDE_NOT_ALWAYS);
+        }
+    }
+
+    public void hintSearch() {
+        if (!toolbar.isShown() && cardSearch.isShown()) {
+            cardSearch.setVisibility(View.INVISIBLE);
+            toolbar.setVisibility(View.VISIBLE);
+            if (messList != null) {
+                adapter = new UnitAdapter(UnitListActivity.this, R.layout.item_common, messList);
+                list.setAdapter(adapter);
+            }
+        }
     }
 }

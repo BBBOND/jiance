@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -23,6 +24,7 @@ import butterknife.ButterKnife;
  */
 public class SettingActivity extends AppCompatActivity {
 
+    String TAG = "SettingActivity";
 
     @Bind(R.id.toolbar)
     Toolbar toolbar;
@@ -51,6 +53,26 @@ public class SettingActivity extends AppCompatActivity {
     }
 
     public void init() {
+
+        MySharedPreferences mySharedPreferences = new MySharedPreferences(SettingActivity.this);
+        String ipAndPort = mySharedPreferences.readIPAndPort();
+        if (!ipAndPort.equals(":") && ipAndPort != null && ipAndPort.length() > 1) {
+            String[] IAP = ipAndPort.split(":");
+            String[] ip = IAP[0].split("[.]");
+            settingIp0.setText(ip[0]);
+            settingIp1.setText(ip[1]);
+            settingIp2.setText(ip[2]);
+            settingIp3.setText(ip[3]);
+            settingPort.setText(IAP[1]);
+        } else {
+            settingIp0.setText("192");
+            settingIp1.setText("168");
+            settingIp2.setText("174");
+            settingIp3.setText("15");
+            settingPort.setText("8888");
+        }
+
+
         settingIp0.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {

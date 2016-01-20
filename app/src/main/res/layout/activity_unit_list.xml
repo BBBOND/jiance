@@ -8,6 +8,8 @@
     android:orientation="vertical"
     tools:context=".LoginActivity">
 
+    <include layout="@layout/card_search" />
+
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
