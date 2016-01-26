@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ListView;
 
 import com.alibaba.fastjson.JSON;
@@ -20,41 +21,67 @@ import com.kim.jiance.R;
 import com.kim.jiance.content.App;
 import com.kim.jiance.content.MyURL;
 import com.kim.jiance.model.basicdata.EventInfo;
-import com.kim.jiance.unit.machine.MachineInfoActivity;
 import com.kim.jiance.utils.HttpUtil;
 
 import org.restlet.resource.ResourceException;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
+
 /**
  * Created by 伟阳 on 2015/11/18.
  */
-public class EventListFragment extends Fragment implements AdapterView.OnItemClickListener, SwipeRefreshLayout.OnRefreshListener {
+public class EventListFragment extends Fragment implements AdapterView.OnItemClickListener, SwipeRefreshLayout.OnRefreshListener, View.OnClickListener {
 
     private ListView list;
     private SwipeRefreshLayout swiperefreshlayout;
 
+    List<EventInfo> eventList = new ArrayList<>();
     private EventAdapter adapter;
     private String unitId;
+    private int currentPage = 0;
+    private static final int PAGESIZE = 10;
 
     Handler getEventListHandler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(Message msg) {
             String eventListStr = (String) msg.obj;
             if (!eventListStr.equals("null") && eventListStr != null) {
-                List<EventInfo> eventList = JSON.parseArray(eventListStr, EventInfo.class);
+                eventList = JSON.parseArray(eventListStr, EventInfo.class);
                 adapter = new EventAdapter(getContext(), R.layout.item_common, eventList);
                 list.setAdapter(adapter);
                 swiperefreshlayout.setRefreshing(false);
+                currentPage = 0;
                 return true;
             } else {
                 Snackbar snackbar = Snackbar.make(list, "数据获取失败,请稍后重试!", Snackbar.LENGTH_SHORT);
                 snackbar.show();
                 swiperefreshlayout.setRefreshing(false);
+                return false;
+            }
+        }
+    });
+
+    Handler loadMoreHandler = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(Message msg) {
+            String eventListStr = (String) msg.obj;
+            if (!eventListStr.equals("null") && eventListStr != null) {
+                List<EventInfo> newList = JSON.parseArray(eventListStr, EventInfo.class);
+                if (newList.size() < PAGESIZE)
+                    currentPage--;
+                eventList.addAll(newList);
+                adapter.notifyDataSetChanged();
+                return true;
+            } else {
+                Snackbar snackbar = Snackbar.make(list, "没有更多数据了！", Snackbar.LENGTH_SHORT);
+                snackbar.show();
                 return false;
             }
         }
@@ -83,6 +110,15 @@ public class EventListFragment extends Fragment implements AdapterView.OnItemCli
     }
 
     @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.loadMoreBtn:
+                loadMore(++currentPage);
+                break;
+        }
+    }
+
+    @Override
     public void onRefresh() {
         refresh();
     }
@@ -92,8 +128,9 @@ public class EventListFragment extends Fragment implements AdapterView.OnItemCli
             @Override
             public void run() {
                 Map<String, Object> map = new HashMap<String, Object>();
-                map.put("userid", App.getUserID());
                 map.put("unitid", unitId);
+                map.put("pageNum", 0);
+                map.put("pageSize", PAGESIZE);
                 Log.d("EventListFragment", JSON.toJSONString(map));
                 try {
                     String eventListStr = HttpUtil.get(getContext(), MyURL.GETEVENTINFOSIMPL, JSON.toJSONString(map));
@@ -116,4 +153,42 @@ public class EventListFragment extends Fragment implements AdapterView.OnItemCli
             }
         }).start();
     }
+
+    public void loadMore(final int page) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Map<String, Object> map = new HashMap<String, Object>();
+                map.put("unitid", unitId);
+                map.put("pageNum", page);
+                map.put("pageSize", PAGESIZE);
+                Log.d("EventListFragment", JSON.toJSONString(map));
+                try {
+                    String eventListStr = HttpUtil.get(getContext(), MyURL.GETEVENTINFOSIMPL, JSON.toJSONString(map));
+                    Message message = Message.obtain();
+                    message.obj = eventListStr;
+                    loadMoreHandler.sendMessage(message);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    Log.d("EventListFragment", "获取事件列表连接失败");
+                    Message message = Message.obtain();
+                    message.obj = "null";
+                    loadMoreHandler.sendMessage(message);
+                } catch (ResourceException e) {
+                    e.printStackTrace();
+                    Log.d("EventListFragment", "获取事件列表失败");
+                    Message message = Message.obtain();
+                    message.obj = "null";
+                    loadMoreHandler.sendMessage(message);
+                }
+            }
+        }).start();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        ButterKnife.unbind(this);
+    }
+
 }

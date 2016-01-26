@@ -20,6 +20,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -48,7 +49,7 @@ import butterknife.ButterKnife;
 /**
  * Created by 伟阳 on 2015/11/17.
  */
-public class UnitListActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener, AdapterView.OnItemClickListener {
+public class UnitListActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener, AdapterView.OnItemClickListener, View.OnClickListener {
     @Bind(R.id.toolbar)
     Toolbar toolbar;
     @Bind(R.id.list)
@@ -63,11 +64,15 @@ public class UnitListActivity extends AppCompatActivity implements SwipeRefreshL
     ImageView imageClearSearch;
     @Bind(R.id.card_search)
     RelativeLayout cardSearch;
+    @Bind(R.id.loadMoreBtn)
+    Button loadMoreBtn;
 
     private int backKeyPressedTime = 0;
     private UnitAdapter adapter;
     private List<SimpleFireControlMess> messList = null;
     private List<SimpleFireControlMess> searchList = null;
+    private int currentPage = 0;
+    private static final int PAGESIZE = 10;
 
     Handler getUnitListHandler = new Handler(new Handler.Callback() {
         @Override
@@ -78,11 +83,32 @@ public class UnitListActivity extends AppCompatActivity implements SwipeRefreshL
                 adapter = new UnitAdapter(UnitListActivity.this, R.layout.item_common, messList);
                 list.setAdapter(adapter);
                 swiperefreshlayout.setRefreshing(false);
+                currentPage = 0;
                 return true;
             } else {
                 Snackbar snackbar = Snackbar.make(toolbar, "数据获取失败,请稍后重试!", Snackbar.LENGTH_SHORT);
                 snackbar.show();
                 swiperefreshlayout.setRefreshing(false);
+                return false;
+            }
+        }
+    });
+
+    Handler loadMoreHandler = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(Message msg) {
+            String unitListStr = (String) msg.obj;
+            if (!unitListStr.equals("null") && unitListStr != null) {
+                List<SimpleFireControlMess> newList = JSON.parseArray(unitListStr, SimpleFireControlMess.class);
+                if (newList.size() < PAGESIZE)
+                    currentPage--;
+                messList.addAll(newList);
+                adapter.notifyDataSetChanged();
+                currentPage = 0;
+                return true;
+            } else {
+                Snackbar snackbar = Snackbar.make(list, "没有更多数据了！", Snackbar.LENGTH_SHORT);
+                snackbar.show();
                 return false;
             }
         }
@@ -172,6 +198,15 @@ public class UnitListActivity extends AppCompatActivity implements SwipeRefreshL
     }
 
     @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.loadMoreBtn:
+                loadMore(++currentPage);
+                break;
+        }
+    }
+
+    @Override
     public void onRefresh() {
         refresh();
     }
@@ -181,7 +216,8 @@ public class UnitListActivity extends AppCompatActivity implements SwipeRefreshL
             @Override
             public void run() {
                 Map<String, Object> map = new HashMap<String, Object>();
-                map.put("userid", App.getUserID());
+                map.put("pageNum", 0);
+                map.put("pageSize", PAGESIZE);
                 Log.d("UnitListActivity", JSON.toJSONString(map));
                 try {
                     String unitListStr = HttpUtil.get(UnitListActivity.this, MyURL.MESSAGEOFEQUIPSIMPL, JSON.toJSONString(map));
@@ -200,6 +236,36 @@ public class UnitListActivity extends AppCompatActivity implements SwipeRefreshL
                     Message message = Message.obtain();
                     message.obj = "null";
                     getUnitListHandler.sendMessage(message);
+                }
+            }
+        }).start();
+    }
+
+    public void loadMore(final int page) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Map<String, Object> map = new HashMap<String, Object>();
+                map.put("pageNum", page);
+                map.put("pageSize", PAGESIZE);
+                Log.d("UnitListActivity", " loadMore:" + JSON.toJSONString(map));
+                try {
+                    String unitListStr = HttpUtil.get(UnitListActivity.this, MyURL.MESSAGEOFEQUIPSIMPL, JSON.toJSONString(map));
+                    Message message = Message.obtain();
+                    message.obj = unitListStr;
+                    loadMoreHandler.sendMessage(message);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    Log.d("UnitListActivity", "获取单位列表连接失败");
+                    Message message = Message.obtain();
+                    message.obj = "null";
+                    loadMoreHandler.sendMessage(message);
+                } catch (ResourceException e) {
+                    e.printStackTrace();
+                    Log.d("UnitListActivity", "获取单位列表失败");
+                    Message message = Message.obtain();
+                    message.obj = "null";
+                    loadMoreHandler.sendMessage(message);
                 }
             }
         }).start();
@@ -266,4 +332,5 @@ public class UnitListActivity extends AppCompatActivity implements SwipeRefreshL
             }
         }
     }
+
 }
