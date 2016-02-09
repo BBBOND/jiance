@@ -1,6 +1,7 @@
 package com.kim.jiance.unit.event;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -13,7 +14,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.ListView;
 
 import com.alibaba.fastjson.JSON;
@@ -22,13 +22,18 @@ import com.kim.jiance.content.App;
 import com.kim.jiance.content.MyURL;
 import com.kim.jiance.model.basicdata.EventInfo;
 import com.kim.jiance.utils.HttpUtil;
+import com.kim.jiance.view.LoadListView;
+import com.kim.jiance.view.MyListView;
 
 import org.restlet.resource.ResourceException;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import butterknife.Bind;
@@ -37,16 +42,18 @@ import butterknife.ButterKnife;
 /**
  * Created by 伟阳 on 2015/11/18.
  */
-public class EventListFragment extends Fragment implements AdapterView.OnItemClickListener, SwipeRefreshLayout.OnRefreshListener, View.OnClickListener {
+public class EventListFragment extends Fragment implements AdapterView.OnItemClickListener, SwipeRefreshLayout.OnRefreshListener, LoadListView.LoadListener {
 
-    private ListView list;
-    private SwipeRefreshLayout swiperefreshlayout;
+    @Bind(R.id.list)
+    LoadListView list;
+    @Bind(R.id.refresh_layout)
+    SwipeRefreshLayout refreshLayout;
 
     List<EventInfo> eventList = new ArrayList<>();
     private EventAdapter adapter;
     private String unitId;
     private int currentPage = 0;
-    private static final int PAGESIZE = 10;
+    private static final int PAGESIZE = 15;
 
     Handler getEventListHandler = new Handler(new Handler.Callback() {
         @Override
@@ -56,13 +63,11 @@ public class EventListFragment extends Fragment implements AdapterView.OnItemCli
                 eventList = JSON.parseArray(eventListStr, EventInfo.class);
                 adapter = new EventAdapter(getContext(), R.layout.item_common, eventList);
                 list.setAdapter(adapter);
-                swiperefreshlayout.setRefreshing(false);
                 currentPage = 0;
                 return true;
             } else {
                 Snackbar snackbar = Snackbar.make(list, "数据获取失败,请稍后重试!", Snackbar.LENGTH_SHORT);
                 snackbar.show();
-                swiperefreshlayout.setRefreshing(false);
                 return false;
             }
         }
@@ -76,12 +81,15 @@ public class EventListFragment extends Fragment implements AdapterView.OnItemCli
                 List<EventInfo> newList = JSON.parseArray(eventListStr, EventInfo.class);
                 if (newList.size() < PAGESIZE)
                     currentPage--;
+                eventList.removeAll(newList);
                 eventList.addAll(newList);
                 adapter.notifyDataSetChanged();
+                list.loadComplete();
                 return true;
             } else {
                 Snackbar snackbar = Snackbar.make(list, "没有更多数据了！", Snackbar.LENGTH_SHORT);
                 snackbar.show();
+                list.loadComplete();
                 return false;
             }
         }
@@ -91,12 +99,16 @@ public class EventListFragment extends Fragment implements AdapterView.OnItemCli
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_event_list, null);
-        list = (ListView) view.findViewById(R.id.list);
-        swiperefreshlayout = (SwipeRefreshLayout) view.findViewById(R.id.swiperefreshlayout);
-        swiperefreshlayout.setColorSchemeColors(R.color.snow_white);
-        swiperefreshlayout.setOnRefreshListener(this);
-        list.setOnItemClickListener(this);
+        ButterKnife.bind(this, view);
+
         unitId = App.getUnitID();
+
+        list.setOnItemClickListener(this);
+        list.setLoadListener(this);
+        refreshLayout.setOnRefreshListener(this);
+        refreshLayout.setColorSchemeColors(Color.BLUE);
+
+        refreshLayout.setRefreshing(true);
         refresh();
         return view;
     }
@@ -107,15 +119,6 @@ public class EventListFragment extends Fragment implements AdapterView.OnItemCli
         Intent intent = new Intent(getContext(), EventInfoActivity.class);
         intent.putExtra("eventinfo", JSON.toJSONString(eventInfo));
         startActivity(intent);
-    }
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.loadMoreBtn:
-                loadMore(++currentPage);
-                break;
-        }
     }
 
     @Override
@@ -191,4 +194,8 @@ public class EventListFragment extends Fragment implements AdapterView.OnItemCli
         ButterKnife.unbind(this);
     }
 
+    @Override
+    public void onLoad() {
+        loadMore(++currentPage);
+    }
 }

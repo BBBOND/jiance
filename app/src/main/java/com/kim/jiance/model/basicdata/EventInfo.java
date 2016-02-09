@@ -241,4 +241,58 @@ public class EventInfo {
     public void setIsFalseReport(Boolean isFalseReport) {
         this.isFalseReport = isFalseReport;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        EventInfo eventInfo = (EventInfo) o;
+
+        if (!id.equals(eventInfo.id)) return false;
+        if (!unitId.equals(eventInfo.unitId)) return false;
+        if (!handleUserId.equals(eventInfo.handleUserId)) return false;
+        if (!eventTypeId.equals(eventInfo.eventTypeId)) return false;
+        if (!unitName.equals(eventInfo.unitName)) return false;
+        if (!unitAddr.equals(eventInfo.unitAddr)) return false;
+        if (!contactTel.equals(eventInfo.contactTel)) return false;
+        if (!machineCode.equals(eventInfo.machineCode)) return false;
+        if (!alertMachine.equals(eventInfo.alertMachine)) return false;
+        if (!alertSource.equals(eventInfo.alertSource)) return false;
+        if (!alertDescription.equals(eventInfo.alertDescription)) return false;
+        if (!happenPlace.equals(eventInfo.happenPlace)) return false;
+        if (!eventName.equals(eventInfo.eventName)) return false;
+        if (!happenTime.equals(eventInfo.happenTime)) return false;
+        if (!eventDescription.equals(eventInfo.eventDescription)) return false;
+        if (!handleDescription.equals(eventInfo.handleDescription)) return false;
+        if (!handleTime.equals(eventInfo.handleTime)) return false;
+        if (!isHandle.equals(eventInfo.isHandle)) return false;
+        return isFalseReport.equals(eventInfo.isFalseReport);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id.hashCode();
+        result = 31 * result + unitId.hashCode();
+        result = 31 * result + handleUserId.hashCode();
+        result = 31 * result + eventTypeId.hashCode();
+        result = 31 * result + unitName.hashCode();
+        result = 31 * result + unitAddr.hashCode();
+        result = 31 * result + contactTel.hashCode();
+        result = 31 * result + machineCode.hashCode();
+        result = 31 * result + alertMachine.hashCode();
+        result = 31 * result + alertSource.hashCode();
+        result = 31 * result + alertDescription.hashCode();
+        result = 31 * result + happenPlace.hashCode();
+        result = 31 * result + eventName.hashCode();
+        result = 31 * result + happenTime.hashCode();
+        result = 31 * result + eventDescription.hashCode();
+        result = 31 * result + handleDescription.hashCode();
+        result = 31 * result + handleTime.hashCode();
+        result = 31 * result + isHandle.hashCode();
+        result = 31 * result + isFalseReport.hashCode();
+        return result;
+    }
 }
+

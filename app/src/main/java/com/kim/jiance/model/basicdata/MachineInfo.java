@@ -88,4 +88,37 @@ public class MachineInfo {
     public void setIsUsed(Boolean isUsed) {
         this.isUsed = isUsed;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        MachineInfo that = (MachineInfo) o;
+
+        if (!id.equals(that.id)) return false;
+        if (!unitId.equals(that.unitId)) return false;
+        if (!machineCode.equals(that.machineCode)) return false;
+        if (!machineName.equals(that.machineName)) return false;
+        if (!machineType.equals(that.machineType)) return false;
+        if (!machineIndex.equals(that.machineIndex)) return false;
+        if (!maker.equals(that.maker)) return false;
+        if (!machineVersion.equals(that.machineVersion)) return false;
+        return isUsed.equals(that.isUsed);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id.hashCode();
+        result = 31 * result + unitId.hashCode();
+        result = 31 * result + machineCode.hashCode();
+        result = 31 * result + machineName.hashCode();
+        result = 31 * result + machineType.hashCode();
+        result = 31 * result + machineIndex.hashCode();
+        result = 31 * result + maker.hashCode();
+        result = 31 * result + machineVersion.hashCode();
+        result = 31 * result + isUsed.hashCode();
+        return result;
+    }
 }

@@ -2,6 +2,7 @@ package com.kim.jiance.units;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -20,10 +21,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.RelativeLayout;
 
 import com.alibaba.fastjson.JSON;
@@ -34,6 +33,7 @@ import com.kim.jiance.login.LoginActivity;
 import com.kim.jiance.model.more.SimpleFireControlMess;
 import com.kim.jiance.unit.UnitActivity;
 import com.kim.jiance.utils.HttpUtil;
+import com.kim.jiance.view.LoadListView;
 
 import org.restlet.resource.ResourceException;
 
@@ -47,15 +47,12 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 
 /**
+ * 单位列表
  * Created by 伟阳 on 2015/11/17.
  */
-public class UnitListActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener, AdapterView.OnItemClickListener, View.OnClickListener {
+public class UnitListActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener, AdapterView.OnItemClickListener, LoadListView.LoadListener {
     @Bind(R.id.toolbar)
     Toolbar toolbar;
-    @Bind(R.id.list)
-    ListView list;
-    @Bind(R.id.swiperefreshlayout)
-    SwipeRefreshLayout swiperefreshlayout;
     @Bind(R.id.image_search_back)
     ImageView imageSearchBack;
     @Bind(R.id.edit_text_search)
@@ -64,15 +61,17 @@ public class UnitListActivity extends AppCompatActivity implements SwipeRefreshL
     ImageView imageClearSearch;
     @Bind(R.id.card_search)
     RelativeLayout cardSearch;
-    @Bind(R.id.loadMoreBtn)
-    Button loadMoreBtn;
+    @Bind(R.id.list)
+    LoadListView list;
+    @Bind(R.id.refresh_layout)
+    SwipeRefreshLayout refreshLayout;
 
     private int backKeyPressedTime = 0;
     private UnitAdapter adapter;
     private List<SimpleFireControlMess> messList = null;
     private List<SimpleFireControlMess> searchList = null;
     private int currentPage = 0;
-    private static final int PAGESIZE = 10;
+    private static final int PAGESIZE = 15;
 
     Handler getUnitListHandler = new Handler(new Handler.Callback() {
         @Override
@@ -82,13 +81,13 @@ public class UnitListActivity extends AppCompatActivity implements SwipeRefreshL
                 messList = JSON.parseArray(unitListStr, SimpleFireControlMess.class);
                 adapter = new UnitAdapter(UnitListActivity.this, R.layout.item_common, messList);
                 list.setAdapter(adapter);
-                swiperefreshlayout.setRefreshing(false);
+                refreshLayout.setRefreshing(false);
                 currentPage = 0;
                 return true;
             } else {
                 Snackbar snackbar = Snackbar.make(toolbar, "数据获取失败,请稍后重试!", Snackbar.LENGTH_SHORT);
                 snackbar.show();
-                swiperefreshlayout.setRefreshing(false);
+                refreshLayout.setRefreshing(false);
                 return false;
             }
         }
@@ -102,13 +101,16 @@ public class UnitListActivity extends AppCompatActivity implements SwipeRefreshL
                 List<SimpleFireControlMess> newList = JSON.parseArray(unitListStr, SimpleFireControlMess.class);
                 if (newList.size() < PAGESIZE)
                     currentPage--;
+                messList.removeAll(newList);
                 messList.addAll(newList);
                 adapter.notifyDataSetChanged();
                 currentPage = 0;
+                list.loadComplete();
                 return true;
             } else {
                 Snackbar snackbar = Snackbar.make(list, "没有更多数据了！", Snackbar.LENGTH_SHORT);
                 snackbar.show();
+                list.loadComplete();
                 return false;
             }
         }
@@ -122,9 +124,10 @@ public class UnitListActivity extends AppCompatActivity implements SwipeRefreshL
 
         setSupportActionBar(toolbar);
 
-        swiperefreshlayout.setColorSchemeColors(R.color.snow_white);
-        swiperefreshlayout.setOnRefreshListener(this);
+        refreshLayout.setOnRefreshListener(this);
+        refreshLayout.setColorSchemeColors(Color.BLUE);
         list.setOnItemClickListener(this);
+        list.setLoadListener(this);
 
         imageSearchBack.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -168,6 +171,8 @@ public class UnitListActivity extends AppCompatActivity implements SwipeRefreshL
 
             }
         });
+
+        refreshLayout.setRefreshing(true);
         refresh();
     }
 
@@ -195,15 +200,6 @@ public class UnitListActivity extends AppCompatActivity implements SwipeRefreshL
         App.setUnitID(simpleFireControlMess.getUnitid());
         intent.putExtra("unitcode", simpleFireControlMess.getUnitcode());
         startActivity(intent);
-    }
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.loadMoreBtn:
-                loadMore(++currentPage);
-                break;
-        }
     }
 
     @Override
@@ -333,4 +329,8 @@ public class UnitListActivity extends AppCompatActivity implements SwipeRefreshL
         }
     }
 
+    @Override
+    public void onLoad() {
+        loadMore(++currentPage);
+    }
 }

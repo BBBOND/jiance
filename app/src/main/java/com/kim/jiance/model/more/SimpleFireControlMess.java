@@ -59,5 +59,33 @@ public class SimpleFireControlMess implements Serializable {
         this.equipmentintegrityrate = equipmentintegrityrate;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
+        SimpleFireControlMess that = (SimpleFireControlMess) o;
+
+        if (evetcount != that.evetcount) return false;
+        if (totlafailure != that.totlafailure) return false;
+        if (Double.compare(that.equipmentintegrityrate, equipmentintegrityrate) != 0) return false;
+        if (!unitid.equals(that.unitid)) return false;
+        if (!unitcode.equals(that.unitcode)) return false;
+        return unitname.equals(that.unitname);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result;
+        long temp;
+        result = unitid.hashCode();
+        result = 31 * result + unitcode.hashCode();
+        result = 31 * result + unitname.hashCode();
+        result = 31 * result + evetcount;
+        result = 31 * result + totlafailure;
+        temp = Double.doubleToLongBits(equipmentintegrityrate);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        return result;
+    }
 }
