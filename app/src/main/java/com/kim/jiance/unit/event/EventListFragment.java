@@ -61,13 +61,15 @@ public class EventListFragment extends Fragment implements AdapterView.OnItemCli
             String eventListStr = (String) msg.obj;
             if (!eventListStr.equals("null") && eventListStr != null) {
                 eventList = JSON.parseArray(eventListStr, EventInfo.class);
-                adapter = new EventAdapter(getContext(), R.layout.item_common, eventList);
+                adapter = new EventAdapter(getContext(), R.layout.item_event, eventList);
                 list.setAdapter(adapter);
+                refreshLayout.setRefreshing(false);
                 currentPage = 0;
                 return true;
             } else {
                 Snackbar snackbar = Snackbar.make(list, "数据获取失败,请稍后重试!", Snackbar.LENGTH_SHORT);
                 snackbar.show();
+                refreshLayout.setRefreshing(false);
                 return false;
             }
         }
@@ -81,8 +83,11 @@ public class EventListFragment extends Fragment implements AdapterView.OnItemCli
                 List<EventInfo> newList = JSON.parseArray(eventListStr, EventInfo.class);
                 if (newList.size() < PAGESIZE)
                     currentPage--;
+                Log.d("newList---0->", newList.size() + "=====" + newList.toString());
+                Log.d("aeventList---1->", eventList.size() + "=====" + eventList.toString());
                 eventList.removeAll(newList);
                 eventList.addAll(newList);
+                Log.d("eventList---2->", eventList.size() + "=====" + eventList.toString());
                 adapter.notifyDataSetChanged();
                 list.loadComplete();
                 return true;
@@ -107,8 +112,8 @@ public class EventListFragment extends Fragment implements AdapterView.OnItemCli
         list.setLoadListener(this);
         refreshLayout.setOnRefreshListener(this);
         refreshLayout.setColorSchemeColors(Color.BLUE);
-
         refreshLayout.setRefreshing(true);
+
         refresh();
         return view;
     }
@@ -169,6 +174,7 @@ public class EventListFragment extends Fragment implements AdapterView.OnItemCli
                 try {
                     String eventListStr = HttpUtil.get(getContext(), MyURL.GETEVENTINFOSIMPL, JSON.toJSONString(map));
                     Message message = Message.obtain();
+                    Log.d("EventListFragment", eventListStr);
                     message.obj = eventListStr;
                     loadMoreHandler.sendMessage(message);
                 } catch (IOException e) {

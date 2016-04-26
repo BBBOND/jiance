@@ -42,12 +42,10 @@ public class EventAdapter extends ArrayAdapter<EventInfo> {
         TextView item2 = (TextView) view.findViewById(R.id.item2);
         TextView item3 = (TextView) view.findViewById(R.id.item3);
         TextView item4 = (TextView) view.findViewById(R.id.item4);
-        TextView item5 = (TextView) view.findViewById(R.id.item5);
 
-        item1.setText(eventInfo.getUnitName());
-        item2.setText(eventInfo.getEventName());
-        item3.setText(eventInfo.getHappenPlace());
-        item4.setText(eventInfo.getHappenTime());
+        item1.setText(eventInfo.getEventName());
+        item2.setText(eventInfo.getHappenPlace());
+        item3.setText(eventInfo.getHappenTime());
         String text = "";
         CharSequence charSequence = "";
         if (eventInfo.getIsHandle()) {
@@ -57,7 +55,7 @@ public class EventAdapter extends ArrayAdapter<EventInfo> {
             text = "<font color='red'>未处理</font>";
             charSequence = Html.fromHtml(text);
         }
-        item5.setText(charSequence);
+        item4.setText(charSequence);
 
         return view;
     }

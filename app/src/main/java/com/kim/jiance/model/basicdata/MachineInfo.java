@@ -96,15 +96,7 @@ public class MachineInfo {
 
         MachineInfo that = (MachineInfo) o;
 
-        if (!id.equals(that.id)) return false;
-        if (!unitId.equals(that.unitId)) return false;
-        if (!machineCode.equals(that.machineCode)) return false;
-        if (!machineName.equals(that.machineName)) return false;
-        if (!machineType.equals(that.machineType)) return false;
-        if (!machineIndex.equals(that.machineIndex)) return false;
-        if (!maker.equals(that.maker)) return false;
-        if (!machineVersion.equals(that.machineVersion)) return false;
-        return isUsed.equals(that.isUsed);
+        return (id.equals(that.id));
 
     }
 

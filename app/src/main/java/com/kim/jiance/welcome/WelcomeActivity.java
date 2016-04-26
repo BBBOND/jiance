@@ -9,21 +9,9 @@ import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.kim.jiance.R;
-import com.kim.jiance.content.App;
-import com.kim.jiance.content.Common;
-import com.kim.jiance.login.Login;
 import com.kim.jiance.login.LoginActivity;
-import com.kim.jiance.unit.UnitActivity;
-import com.kim.jiance.unit.machine.MachineListFragment;
-import com.kim.jiance.units.UnitListActivity;
-import com.kim.jiance.utils.MySharedPreferences;
-
-import java.util.Map;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;

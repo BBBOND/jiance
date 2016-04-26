@@ -14,7 +14,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ListView;
 
 import com.alibaba.fastjson.JSON;
 import com.kim.jiance.R;
@@ -23,17 +22,13 @@ import com.kim.jiance.content.MyURL;
 import com.kim.jiance.model.basicdata.MachineInfo;
 import com.kim.jiance.utils.HttpUtil;
 import com.kim.jiance.view.LoadListView;
-import com.kim.jiance.view.MyListView;
 
 import org.restlet.resource.ResourceException;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import butterknife.Bind;
@@ -61,7 +56,7 @@ public class MachineListFragment extends Fragment implements SwipeRefreshLayout.
             String machineListStr = (String) msg.obj;
             if (!machineListStr.equals("null") && machineListStr != null) {
                 messList = JSON.parseArray(machineListStr, MachineInfo.class);
-                adapter = new MachineAdapter(getContext(), R.layout.item_common, messList);
+                adapter = new MachineAdapter(getContext(), R.layout.item_machine, messList);
                 list.setAdapter(adapter);
                 refreshLayout.setRefreshing(false);
                 currentPage = 0;
@@ -78,9 +73,9 @@ public class MachineListFragment extends Fragment implements SwipeRefreshLayout.
     Handler loadMoreHandler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(Message msg) {
-            String eventListStr = (String) msg.obj;
-            if (!eventListStr.equals("null") && eventListStr != null) {
-                List<MachineInfo> newList = JSON.parseArray(eventListStr, MachineInfo.class);
+            String machineListStr = (String) msg.obj;
+            if (!machineListStr.equals("null") && machineListStr != null) {
+                List<MachineInfo> newList = JSON.parseArray(machineListStr, MachineInfo.class);
                 if (newList.size() < PAGESIZE)
                     currentPage--;
                 messList.removeAll(newList);
@@ -171,6 +166,7 @@ public class MachineListFragment extends Fragment implements SwipeRefreshLayout.
                 try {
                     String machineListStr = HttpUtil.get(getContext(), MyURL.GETMACHINEINFOSIMPL, JSON.toJSONString(map));
                     Message message = Message.obtain();
+                    Log.d("MachineListFragment", machineListStr);
                     message.obj = machineListStr;
                     loadMoreHandler.sendMessage(message);
                 } catch (IOException e) {

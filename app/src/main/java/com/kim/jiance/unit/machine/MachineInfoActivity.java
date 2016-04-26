@@ -64,13 +64,14 @@ public class MachineInfoActivity extends AppCompatActivity {
         machineVersion.setText(machineInfo.getMachineVersion());
         String text = "";
         CharSequence charSequence = "";
-        if (machineInfo.getIsUsed()) {
-            text = "<font color='green'>可用</font>";
-            charSequence = Html.fromHtml(text);
-        } else {
-            text = "<font color='red'>不可用</font>";
-            charSequence = Html.fromHtml(text);
-        }
+        if (machineInfo.getIsUsed() != null)
+            if (machineInfo.getIsUsed()) {
+                text = "<font color='green'>可用</font>";
+                charSequence = Html.fromHtml(text);
+            } else {
+                text = "<font color='red'>不可用</font>";
+                charSequence = Html.fromHtml(text);
+            }
         machineIsUsed.setText(charSequence);
     }
 

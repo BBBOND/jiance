@@ -79,7 +79,7 @@ public class UnitListActivity extends AppCompatActivity implements SwipeRefreshL
             String unitListStr = (String) msg.obj;
             if (!unitListStr.equals("null") && unitListStr != null) {
                 messList = JSON.parseArray(unitListStr, SimpleFireControlMess.class);
-                adapter = new UnitAdapter(UnitListActivity.this, R.layout.item_common, messList);
+                adapter = new UnitAdapter(UnitListActivity.this, R.layout.item_machine, messList);
                 list.setAdapter(adapter);
                 refreshLayout.setRefreshing(false);
                 currentPage = 0;
@@ -161,7 +161,7 @@ public class UnitListActivity extends AppCompatActivity implements SwipeRefreshL
                             searchList.add(simpleFireControlMess);
                         }
                     }
-                    adapter = new UnitAdapter(UnitListActivity.this, R.layout.item_common, searchList);
+                    adapter = new UnitAdapter(UnitListActivity.this, R.layout.item_machine, searchList);
                     list.setAdapter(adapter);
                 }
             }
@@ -323,7 +323,7 @@ public class UnitListActivity extends AppCompatActivity implements SwipeRefreshL
             cardSearch.setVisibility(View.INVISIBLE);
             toolbar.setVisibility(View.VISIBLE);
             if (messList != null) {
-                adapter = new UnitAdapter(UnitListActivity.this, R.layout.item_common, messList);
+                adapter = new UnitAdapter(UnitListActivity.this, R.layout.item_machine, messList);
                 list.setAdapter(adapter);
             }
         }

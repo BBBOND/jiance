@@ -133,7 +133,6 @@ public class EventInfoActivity extends AppCompatActivity {
             public void run() {
                 Map<String, Object> map = new HashMap<String, Object>();
                 map.put("userid", eventInfo.getHandleUserId());
-                Log.d("EventInfoActivity", JSON.toJSONString(map));
                 try {
                     String result = HttpUtil.get(EventInfoActivity.this, MyURL.GETUSERINFO, JSON.toJSONString(map));
                     Message message = Message.obtain();
